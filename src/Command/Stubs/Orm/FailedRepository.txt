@@ -2,24 +2,31 @@
 
 namespace {{namespace}};
 
+use App\Entity\{{className}};
 use Finko\QueueBundle\Entity\FailedJobEntityInterface as EntityInterface;
 use Finko\QueueBundle\Repository\FailedJobRepositoryInterface as RepositoryInterface;
-use Doctrine\ORM\EntityRepository;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * Class {{className}}Repository
  *
  * @package {{namespace}}
  */
-class {{className}}Repository  extends EntityRepository implements RepositoryInterface
+class {{className}}Repository  extends ServiceEntityRepository implements RepositoryInterface
 {
+    public function __construct(RegistryInterface $registry)
+    {
+        parent::__construct($registry, {{className}}::class);
+    }
+
     /**
      * @inheritDoc
      */
     public function log($connectionName, $queue, $rawBody, \Exception $exception)
     {
         /** @var EntityInterface $entity */
-        $entity = new {{className}};
+        $entity = new {{className}}();
 
         $entity->setConnection($connectionName)
                ->setQueue($queue)

@@ -2,8 +2,8 @@
 
 namespace {{namespace}};
 
-use Finko\QueueBundle\Entity\FailedJobEntityInterface as EntityInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Finko\QueueBundle\Entity\FailedJobEntityInterface as EntityInterface;
 
 /**
  * Class {{className}}
@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @package {{namespace}}
  *
  * @ORM\Table(name="{{tableName}}")
- * @ORM\Entity(repositoryClass="{{namespace}}\{{className}}Repository")
+ * @ORM\Entity(repositoryClass="{{bundleName}}\Repository\{{className}}Repository")
  */
 class {{className}} implements EntityInterface
 {

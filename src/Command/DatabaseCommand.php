@@ -23,7 +23,7 @@ class DatabaseCommand extends Command
      *
      * @var string
      */
-    private $cacheDirectoryPath;
+//    private $cacheDirectoryPath;
 
     /**
      * @var KernelInterface
@@ -38,7 +38,7 @@ class DatabaseCommand extends Command
      */
     public function __construct($cacheDirectoryPath, KernelInterface $kernel)
     {
-        $this->cacheDirectoryPath = $cacheDirectoryPath . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR . 'output';
+//        $this->cacheDirectoryPath = $cacheDirectoryPath . DIRECTORY_SEPARATOR .'..'. DIRECTORY_SEPARATOR . 'output';
         $this->kernel = $kernel;
 
         parent::__construct();
@@ -66,57 +66,36 @@ class DatabaseCommand extends Command
         $question->setErrorMessage('Mapping %s is invalid valid choices are 0 and 1.');
         $flavor = $helper->ask($input, $output, $question);
 
-//        $msg = '<question>Please enter the bundle name where you want to define the entity (AppBundle):</question> ';
-//        $question = new Question($msg, 'AppBundle');
-//        $bundleName = $helper->ask($input, $output, $question);
-        $bundleName = 'App';
-
-//        try {
-
-//            $bundle = $this->kernel->getBundle($bundleName);
-            $namespace = $this->getNamespace('App', $flavor);
-
-//        } catch (\InvalidArgumentException $exception) {
-//
-//            $output->writeln('');
-//            $output->write('No bundle exist by the name: ');
-//            $output->writeln('<info>'. $bundleName .'</info>');
-//            $output->write('Valid bundle name are: ');
-//            $output->writeln('<comment>'. implode(', ', array_keys($this->kernel->getBundles())) .'</comment>');
-//            $output->writeln('');
-//
-//            return;
-//        }
-
-        $question = new Question('<question>Please enter the class name for the entity (Queue):</question> ', 'Queue');
+        $question = new Question('<question>Please enter the class name for the entity (Job):</question> ', 'Job');
         $entityName = $helper->ask($input, $output, $question);
 
         $target = ($flavor === 'orm') ? 'table' : 'document';
-        $msg = '<question>Please enter the '. $target .' name where you want to store the jobs (queues):</question> ';
-        $question = new Question($msg, 'queues');
+        $msg = '<question>Please enter the '. $target .' name where you want to store the jobs (jobs):</question> ';
+        $question = new Question($msg, 'jobs');
         $tableName = $helper->ask($input, $output, $question);
+
+	    $bundleName = 'App';
 
         $outputPath = $this->getOutputPath();
         $types = [$entityName => 'Entity.txt', $entityName.'Repository' => 'Repository.txt'];
 
         foreach ($types as $key => $type) {
 
-            $content = $this->replacePlaceholders($this->getTemplate($flavor, $type), $namespace, $bundleName, $entityName, $tableName);
-            file_put_contents($outputPath . $key . '.php', $content);
+            if(stripos($type, 'Repository') !== false) {
+	            $namespace = $this->getNamespace('App', $flavor, true);
+                $content = $this->replacePlaceholders($this->getTemplate($flavor, $type), $namespace, $bundleName, $entityName, $tableName);
+                file_put_contents($outputPath . '/Repository/' . $key . '.php', $content);
+            } else {
+	            $namespace = $this->getNamespace('App', $flavor);
+                $content = $this->replacePlaceholders($this->getTemplate($flavor, $type), $namespace, $bundleName, $entityName, $tableName);
+                file_put_contents($outputPath . '/Entity/'  . $key . '.php', $content);
+            }
         }
 
-        $serviceTemplate = $this->replacePlaceholders($this->getTemplate($flavor, 'Service.txt'), $namespace, $bundleName, $entityName, $tableName);
 
-        $output->writeln('');
-        $output->writeln('');
-        $output->writeln('<comment>Please add this service to your services.yml file</comment>');
-        $output->writeln('');
-        $output->writeln($serviceTemplate);
-        $output->writeln('');
-        $output->writeln('Update application config.yml file for queue database repository to app.repository.queue');
-        $output->writeln('Files are generated in this location <comment>' . $outputPath . '</comment> Please move them to appropriate location.');
-        $output->writeln('<comment>Please see documentation for more information.</comment>');
-        $output->writeln('');
+        $output->writeln('Entity and Repository are generated');
+        $output->writeln('Please update <info>app/config/packages/queue.yaml</info> config file');
+        $output->writeln('the <info>finko_queue.connections.database.repository</info> key with generated fullqualified repository classname');
     }
 
     /**
@@ -155,12 +134,7 @@ class DatabaseCommand extends Command
      */
     protected function getOutputPath()
     {
-        $outputPath = $this->cacheDirectoryPath;
-
-        if (!is_dir($outputPath)) {
-
-            (new Filesystem)->mkdir($outputPath);
-        }
+        $outputPath = $this->kernel->getProjectDir()."/src";
 
         if (!is_writable($outputPath)) {
 
@@ -173,21 +147,20 @@ class DatabaseCommand extends Command
     /**
      * @param object $bundle
      * @param string $flavor
+     * @param string $repository
      *
      * @return string
      */
-    private function getNamespace($src, $flavor)
+    private function getNamespace($src, $flavor, $repository = false)
     {
-//        $pieces = explode('\\', get_class($bundle));
 
-//        if (count($pieces) > 1) {
-//
-//            unset($pieces[count($pieces) - 1]);
-//        }
+	    if(!$repository) {
 
-        $case = ($flavor === 'orm') ? 'Entity' : 'Document';
+	    	$case = ($flavor === 'orm') ? 'Entity' : 'Document';
+	    } else {
+	    	$case = 'Repository';
+	    }
 
         return $src . '\\' . $case;
-//        return implode('\\', $pieces) . '\\' . $case;
     }
 }

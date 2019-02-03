@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\Loader;
  *
  * @link http://symfony.com/doc/current/cookbook/bundles/extension.html
  */
-class finko_queue extends Extension
+class FinkoQueueExtension extends Extension
 {
     /**
      * {@inheritdoc}

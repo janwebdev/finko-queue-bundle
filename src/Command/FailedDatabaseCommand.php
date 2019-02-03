@@ -66,56 +66,36 @@ class FailedDatabaseCommand extends Command
         $question->setErrorMessage('Mapping %s is invalid valid choices are 0 and 1.');
         $flavor = $helper->ask($input, $output, $question);
 
-        $msg = '<question>Please enter the bundle name where you want to define the entity (AppBundle):</question> ';
-        $question = new Question($msg, 'AppBundle');
-        $bundleName = $helper->ask($input, $output, $question);
-
-        try {
-
-            $bundle = $this->kernel->getBundle($bundleName);
-            $namespace = $this->getNamespace($bundle, $flavor);
-
-        } catch (\InvalidArgumentException $exception) {
-
-            $output->writeln('');
-            $output->write('No bundle exist by the name: ');
-            $output->writeln('<info>'. $bundleName .'</info>');
-            $output->write('Valid bundle name are: ');
-            $output->writeln('<comment>'. implode(', ', array_keys($this->kernel->getBundles())) .'</comment>');
-            $output->writeln('');
-
-            return;
-        }
-
-        $question = new Question('<question>Please enter the class name for the entity (FailedJob):</question> ', 'FailedJob');
+        $question = new Question('<question>Please enter the class name for the entity (JobFailed):</question> ', 'JobFailed');
         $entityName = $helper->ask($input, $output, $question);
 
         $target = ($flavor === 'orm') ? 'table' : 'document';
-        $msg = '<question>Please enter the '. $target .' name where you want to store the jobs (failed_jobs):</question> ';
-        $question = new Question($msg, 'failed_jobs');
+        $msg = '<question>Please enter the '. $target .' name where you want to store the jobs (jobs_failed):</question> ';
+        $question = new Question($msg, 'jobs_failed');
         $tableName = $helper->ask($input, $output, $question);
+
+	    $bundleName = 'App';
 
         $outputPath = $this->getOutputPath();
         $types = [$entityName => 'FailedEntity.txt', $entityName.'Repository' => 'FailedRepository.txt'];
 
-        foreach ($types as $key => $type) {
+	    foreach ($types as $key => $type) {
 
-            $content = $this->replacePlaceholders($this->getTemplate($flavor, $type), $namespace, $bundleName, $entityName, $tableName);
-            file_put_contents($outputPath . $key . '.php', $content);
-        }
+		    if(stripos($type, 'Repository') !== false) {
+			    $namespace = $this->getNamespace('App', $flavor, true);
+			    $content = $this->replacePlaceholders($this->getTemplate($flavor, $type), $namespace, $bundleName, $entityName, $tableName);
+			    file_put_contents($outputPath . '/Repository/' . $key . '.php', $content);
+		    } else {
+			    $namespace = $this->getNamespace('App', $flavor);
+			    $content = $this->replacePlaceholders($this->getTemplate($flavor, $type), $namespace, $bundleName, $entityName, $tableName);
+			    file_put_contents($outputPath . '/Entity/'  . $key . '.php', $content);
+		    }
+	    }
 
-        $serviceTemplate = $this->replacePlaceholders($this->getTemplate($flavor, 'FailedService.txt'), $namespace, $bundleName, $entityName, $tableName);
 
-        $output->writeln('');
-        $output->writeln('');
-        $output->writeln('<comment>Please add this service to your services.yml file</comment>');
-        $output->writeln('');
-        $output->writeln($serviceTemplate);
-        $output->writeln('');
-        $output->writeln('Update application config.yml file for queue database repository to app.repository.failed_job');
-        $output->writeln('Files are generated in this location <comment>' . $outputPath . '</comment> Please move them to appropriate location.');
-        $output->writeln('<comment>Please see documentation for more information.</comment>');
-        $output->writeln('');
+	    $output->writeln('Entity and Repository are generated');
+	    $output->writeln('Please update <info>app/config/packages/queue.yaml</info> config file');
+	    $output->writeln('the <info>finko_queue.failed_job_repository</info> key with generated fullqualified repository classname');
     }
 
     /**
@@ -152,40 +132,39 @@ class FailedDatabaseCommand extends Command
      *
      * @return string
      */
-    protected function getOutputPath()
-    {
-        $outputPath = $this->cacheDirectoryPath;
+	/**
+	 * @throws IOException
+	 *
+	 * @return string
+	 */
+	protected function getOutputPath()
+	{
+		$outputPath = $this->kernel->getProjectDir()."/src";
 
-        if (!is_dir($outputPath)) {
+		if (!is_writable($outputPath)) {
 
-            (new Filesystem)->mkdir($outputPath);
-        }
+			throw new IOException(sprintf('The directory "%s" is not writable.', $outputPath), 0, null, $outputPath);
+		}
 
-        if (!is_writable($outputPath)) {
+		return realpath($outputPath) . DIRECTORY_SEPARATOR;
+	}
 
-            throw new IOException(sprintf('The directory "%s" is not writable.', $outputPath), 0, null, $outputPath);
-        }
+	/**
+	 * @param object $bundle
+	 * @param string $flavor
+	 * @param string $repository
+	 *
+	 * @return string
+	 */
+	private function getNamespace($src, $flavor, $repository = false)
+	{
 
-        return realpath($outputPath) . DIRECTORY_SEPARATOR;
-    }
+		if(!$repository) {
+			$case = ($flavor === 'orm') ? 'Entity' : 'Document';
+		} else {
+			$case = 'Repository';
+		}
 
-    /**
-     * @param object $bundle
-     * @param string $flavor
-     *
-     * @return string
-     */
-    private function getNamespace($bundle, $flavor)
-    {
-        $pieces = explode('\\', get_class($bundle));
-
-        if (count($pieces) > 1) {
-
-            unset($pieces[count($pieces) - 1]);
-        }
-
-        $case = ($flavor === 'orm') ? 'Entity' : 'Document';
-
-        return implode('\\', $pieces) . '\\' . $case;
-    }
+		return $src . '\\' . $case;
+	}
 }

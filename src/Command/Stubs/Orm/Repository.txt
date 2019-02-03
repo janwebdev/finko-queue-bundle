@@ -2,18 +2,25 @@
 
 namespace {{namespace}};
 
+use App\Entity\{{className}};
 use Doctrine\DBAL\LockMode;
-use Doctrine\ORM\EntityRepository;
 use Finko\QueueBundle\Entity\DatabaseQueueEntityInterface as EntityInterface;
 use Finko\QueueBundle\Repository\DatabaseQueueRepositoryInterface as RepositoryInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * Class {{className}}Repository
  *
  * @package {{namespace}}
  */
-class {{className}}Repository extends EntityRepository implements RepositoryInterface
+class {{className}}Repository extends ServiceEntityRepository implements RepositoryInterface
 {
+    public function __construct(RegistryInterface $registry)
+    {
+        parent::__construct($registry, {{className}}::class);
+    }
+
     /**
      * @inheritDoc
      */
@@ -32,7 +39,7 @@ class {{className}}Repository extends EntityRepository implements RepositoryInte
     public function createRecord(array $data)
     {
         /** @var EntityInterface $entity */
-        $entity = new {{className}};
+        $entity = new {{className}}();
 
         return $entity->setQueue($data['queue'])
                       ->setPayload($data['payload'])
@@ -156,6 +163,6 @@ class {{className}}Repository extends EntityRepository implements RepositoryInte
      */
     public function findById($id)
     {
-        return $this->getEntityManager()->find('{{bundleName}}:{{className}}', $id);
+        return $this->getEntityManager()->find({{className}}::class, $id);
     }
 }

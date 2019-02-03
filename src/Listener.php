@@ -75,7 +75,8 @@ class Listener
     {
         $command = 'queue:work %s --once --queue=%s --delay=%s --memory=%s --sleep=%s --tries=%s';
 
-        return "{$this->phpBinary()} {$this->consoleBinary()} {$command}";
+//        return "{$this->phpBinary()} {$this->consoleBinary()} {$command}";
+        return "{$command}";
     }
 
     /**

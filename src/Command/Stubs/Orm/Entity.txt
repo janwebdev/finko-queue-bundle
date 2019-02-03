@@ -10,22 +10,12 @@ use Finko\QueueBundle\Entity\DatabaseQueueEntityInterface as EntityInterface;
  *
  * @package {{namespace}}
  *
- * @ORM\Table(name="{{tableName}}", indexes={@ORM\Index(name="{{tableName}}_queue_idx", columns={"queue"})})
- * @ORM\Entity(repositoryClass="{{namespace}}\{{className}}Repository")
- */
-
-
-/**
- * Class {{className}}
- *
- * @package {{namespace}}
- *
  * @ORM\Table(name="{{tableName}}", indexes={
  *     @ORM\Index(name="{{tableName}}_queue_idx", columns={"queue"}),
  *     @ORM\Index(name="{{tableName}}_reserved_idx", columns={"reserved_at"}),
  *     @ORM\Index(name="{{tableName}}_available_idx", columns={"available_at"}),
  * })
- * @ORM\Entity(repositoryClass="{{namespace}}\{{className}}Repository")
+ * @ORM\Entity(repositoryClass="{{bundleName}}\Repository\{{className}}Repository")
  */
 class {{className}} implements EntityInterface
 {
