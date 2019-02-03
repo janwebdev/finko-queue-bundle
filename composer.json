@@ -2,7 +2,7 @@
     "name": "janwebdev/finko-queue-bundle",
     "type": "ideasbucket-queue-bundle",
     "description": "IdeasBucket QueueBundle fork for Symfony Framework 4+",
-    "keywords": ["queue"],
+    "keywords": ["finko","queue","symfony 4"],
     "license": "MIT",
     "support": {
         "issues": "https://github.com/nicholasnet/QueueBundle/issues",
@@ -19,11 +19,11 @@
         "symfony/process": "^2.7 || ^3.0 || ^4.0"
     },
     "require-dev": {
-        "aws/aws-sdk-php": "~3.0",
-        "pda/pheanstalk": "~3.0",
-        "phpunit/phpunit": "~5.7",
-        "predis/predis": "~1.0",
-        "mockery/mockery": "~0.9.4"
+        "aws/aws-sdk-php": "^3.0",
+        "pda/pheanstalk": "^3.0",
+        "phpunit/phpunit": "^8.0",
+        "predis/predis": "~1.1.1",
+        "mockery/mockery": "~1.2.0"
     },
     "autoload": {
         "psr-4": { "Finko\\QueueBundle\\": "src" }
