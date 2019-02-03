@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="finko_queue.exception_handler" class="Finko\QueueBundle\Exception\ErrorHandler">
+            <argument type="service" id="logger" on-invalid="ignore"/>
+        </service>
+        <service id="finko_queue.listener" class="Finko\QueueBundle\Listener" public="false">
+            <argument>%finko_queue.command_path%</argument>
+        </service>
+        <service id="finko_queue" class="Finko\QueueBundle\Manager">
+            <argument type="service" id="service_container"/>
+            <argument>%finko_queue.configuration%</argument>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="finko_queue.switch_service"/>
+        </service>
+        <service id="queue" alias="finko_queue"></service>
+        <service id="finko_queue.worker" class="Finko\QueueBundle\Worker" public="false">
+            <argument type="service" id="finko_queue"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="finko_queue.exception_handler"/>
+        </service>
+        <service id="finko_queue.cache" class="Finko\QueueBundle\Util\CacheAdapter" public="false">
+            <argument type="expression">service(parameter('finko_queue.cache_driver'))</argument>
+        </service>
+    </services>
+</container>

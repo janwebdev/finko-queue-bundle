@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="finko_queue.command.work" class="Finko\QueueBundle\Command\WorkCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="finko_queue.worker"/>
+            <argument type="service" id="finko_queue.switch_service"/>
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="finko_queue.cache"/>
+            <argument>%finko_queue.configuration%</argument>
+            <call method="setFailedJobLogger">
+                <argument on-invalid="ignore" type="service" id="finko_queue.failed_repository" />
+            </call>
+        </service>
+        <service id="finko_queue.command.restart" class="Finko\QueueBundle\Command\RestartCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="finko_queue.cache"/>
+        </service>
+        <service id="finko_queue.command.listen" class="Finko\QueueBundle\Command\ListenCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="finko_queue.listener"/>
+            <argument>%finko_queue.configuration%</argument>
+        </service>
+        <service id="finko_queue.command.retry" class="Finko\QueueBundle\Command\RetryCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="finko_queue"/>
+            <argument on-invalid="ignore" type="service" id="finko_queue.failed_repository"/>
+        </service>
+        <service id="finko_queue.command.failed" class="Finko\QueueBundle\Command\ListFailedCommand">
+            <tag name="console.command"/>
+            <argument on-invalid="ignore" type="service" id="finko_queue.failed_repository"/>
+        </service>
+        <service id="finko_queue.command.forget" class="Finko\QueueBundle\Command\ForgetFailedCommand">
+            <tag name="console.command"/>
+            <argument on-invalid="ignore" type="service" id="finko_queue.failed_repository"/>
+        </service>
+        <service id="finko_queue.command.flush" class="Finko\QueueBundle\Command\FlushFailedCommand">
+            <tag name="console.command"/>
+            <argument on-invalid="ignore" type="service" id="finko_queue.failed_repository"/>
+        </service>
+        <service id="finko_queue.command.database" class="Finko\QueueBundle\Command\DatabaseCommand">
+            <tag name="console.command"/>
+            <argument>%kernel.cache_dir%</argument>
+            <argument type="service" id="kernel"/>
+        </service>
+        <service id="finko_queue.command.failed_database" class="Finko\QueueBundle\Command\FailedDatabaseCommand">
+            <tag name="console.command"/>
+            <argument>%kernel.cache_dir%</argument>
+            <argument type="service" id="kernel"/>
+        </service>
+        <service id="finko_queue.command.job_generate" class="Finko\QueueBundle\Command\GenerateCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="file_locator"/>
+            <argument type="service" id="kernel"/>
+        </service>
+        <service id="finko_queue.command.worker_start" class="Finko\QueueBundle\Command\QueueStartCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="finko_queue.switch_service"/>
+        </service>
+        <service id="finko_queue.command.worker_stop" class="Finko\QueueBundle\Command\QueueStopCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="finko_queue.switch_service"/>
+        </service>
+    </services>
+</container>

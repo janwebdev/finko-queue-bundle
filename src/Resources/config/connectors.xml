@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <service id="finko_queue.connector.sync" class="Finko\QueueBundle\Connector\SyncConnector" public="false">
+            <tag name="finko_queue.connector"/>
+        </service>
+        <service id="finko_queue.connector.beanstalkd" class="Finko\QueueBundle\Connector\BeanstalkdConnector" public="false">
+            <tag name="finko_queue.connector"/>
+        </service>
+        <service id="finko_queue.connector.sqs" class="Finko\QueueBundle\Connector\SqsConnector" public="false">
+            <tag name="finko_queue.connector"/>
+        </service>
+        <service id="finko_queue.connector.null" class="Finko\QueueBundle\Connector\NullConnector" public="false">
+            <tag name="finko_queue.connector"/>
+        </service>
+        <service id="finko_queue.connector.database" class="Finko\QueueBundle\Connector\DatabaseConnector" public="false">
+            <argument type="service" id="finko_queue.database_repository"  on-invalid="ignore"/>
+            <tag name="finko_queue.connector"/>
+        </service>
+        <service id="finko_queue.connector.redis" class="Finko\QueueBundle\Connector\RedisConnector" public="false">
+            <argument type="service" id="finko_queue.redis_client"  on-invalid="ignore"/>
+            <tag name="finko_queue.connector"/>
+        </service>
+    </services>
+</container>
